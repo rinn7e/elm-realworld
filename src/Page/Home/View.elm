@@ -5,7 +5,9 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Page.Home.Type exposing (Model, Msg(..))
+import Util.Http exposing (httpErrorToString)
 import Util.RemoteData as RD
+import VitePluginHelper
 
 
 view : Model -> Html Msg
@@ -34,8 +36,8 @@ view model =
                             RD.Loading ->
                                 div [ class "py-[24px] text-sm text-gray-500" ] [ text "Loading articles..." ]
 
-                            RD.Failure _ ->
-                                div [ class "py-[24px] text-sm text-red-500" ] [ text "Error loading articles" ]
+                            RD.Failure err ->
+                                div [ class "py-[24px] text-sm text-red-500" ] [ text ("Error loading articles: " ++ httpErrorToString err) ]
 
                             RD.Success response ->
                                 if List.isEmpty response.articles then
@@ -73,7 +75,7 @@ viewArticle article =
         [ div [ class "flex items-center justify-between" ]
             [ div [ class "flex items-center gap-[12px]" ]
                 [ a [ href ("/profile/" ++ article.author.username) ]
-                    [ img [ src (Maybe.withDefault "/default-avatar.svg" article.author.image), class "h-[32px] w-[32px] rounded-full object-cover" ] [] ]
+                    [ img [ src (Maybe.withDefault (VitePluginHelper.asset "/src/assets/default-avatar.svg") article.author.image), class "h-[32px] w-[32px] rounded-full object-cover" ] [] ]
                 , div [ class "flex flex-col" ]
                     [ a [ href ("/profile/" ++ article.author.username), class "block text-sm font-medium text-green-600 hover:underline" ] [ text article.author.username ]
                     , span [ class "text-xs text-gray-400" ] [ text article.createdAt ]

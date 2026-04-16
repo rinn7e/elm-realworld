@@ -7,7 +7,8 @@ import Util.RemoteData exposing (RemoteData)
 
 
 type alias Model =
-    { profile : RemoteData Http.Error ProfileResponse
+    { username : String
+    , profile : RemoteData Http.Error ProfileResponse
     , articles : RemoteData Http.Error ArticlesResponse
     , showFavorites : Bool
     }

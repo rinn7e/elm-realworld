@@ -8,7 +8,10 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Page.Article.View as Article
 import Page.Auth.View as Auth
+import Page.Editor.View as Editor
 import Page.Home.View as Home
+import Page.Profile.View as Profile
+import Page.Settings.View as Settings
 import Package.Prelude exposing (cn)
 import Type exposing (AnimateState(..), Model, Msg(..), PageModel(..))
 
@@ -48,11 +51,17 @@ renderPage model =
         Auth subModel ->
             Auth.view subModel |> Html.map AuthMsg
 
+        Editor subModel ->
+            Editor.view subModel |> Html.map EditorMsg
+
+        Profile subModel ->
+            Profile.view subModel |> Html.map ProfileMsg
+
+        Settings subModel ->
+            Settings.view subModel |> Html.map SettingsMsg
+
         Loading ->
             div [ class "flex min-h-[400px] items-center justify-center" ] [ text "Loading..." ]
 
         NotFound ->
             div [ class "p-[16px]" ] [ text "404 - Not Found" ]
-
-        _ ->
-            div [ class "p-[16px]" ] [ text "Unknown page" ]

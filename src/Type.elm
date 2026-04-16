@@ -1,6 +1,7 @@
 module Type exposing (..)
 
 import Api.Type.User exposing (User)
+import Browser exposing (UrlRequest)
 import Browser.Navigation as Nav
 import Component.DebugPanel.Type as DebugPanel
 import Data.Route.Type exposing (AppRoute)
@@ -60,6 +61,7 @@ type alias Model =
 
 type Msg
     = UrlChange Url -- Handle URL changes from browser
+    | LinkClick UrlRequest
     | ChangeRoute Route -- Programmatic route change
     | SetUser (Maybe User)
     | HomeMsg Home.Msg

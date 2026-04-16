@@ -5,7 +5,15 @@ import Http
 
 apiUrl : String -> String
 apiUrl path =
-    "http://localhost:3000/api" ++ path
+    let
+        normalizedPath =
+            if String.startsWith "/" path then
+                path
+
+            else
+                "/" ++ path
+    in
+    "http://localhost:3000/api" ++ normalizedPath
 
 
 authHeader : Maybe String -> List Http.Header

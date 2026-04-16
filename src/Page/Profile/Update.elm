@@ -8,7 +8,8 @@ import Util.RemoteData as RD
 
 init : String -> Bool -> Maybe User -> ( Model, Cmd Msg )
 init username favorites maybeUser =
-    ( { profile = RD.Loading
+    ( { username = username
+      , profile = RD.Loading
       , articles = RD.Loading
       , showFavorites = favorites
       }

@@ -8,6 +8,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Package.Prelude exposing (cn)
 import Type exposing (Animate, AnimateState(..), Model, Msg(..), PageModel(..))
+import VitePluginHelper
 
 
 view : Model -> Html Msg
@@ -71,7 +72,7 @@ view model =
                                     , href ("/profile/" ++ u.username)
                                     ]
                                     [ img
-                                        [ src (Maybe.withDefault "/default-avatar.svg" u.image)
+                                        [ src (Maybe.withDefault (VitePluginHelper.asset "/src/assets/default-avatar.svg") u.image)
                                         , class "h-[28px] w-[28px] rounded-full object-cover"
                                         ]
                                         []

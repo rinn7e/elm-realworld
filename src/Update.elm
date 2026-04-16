@@ -1,6 +1,7 @@
 module Update exposing (..)
 
 import Api.Handler.User as UserApi
+import Browser
 import Browser.Navigation as Nav
 import Component.DebugPanel.Type as DebugPanel
 import Component.DebugPanel.Update as DebugPanel
@@ -14,6 +15,7 @@ import Page.Editor.Update as Editor
 import Page.Home.Update as Home
 import Page.Profile.Update as Profile
 import Page.Settings.Update as Settings
+import Package.Prelude exposing (delayCmd)
 import Ports
 import Type exposing (AnimateState(..), Model, Msg(..), PageModel(..))
 import Url exposing (Url)
@@ -192,6 +194,16 @@ update msg model =
                 in
                 changeRouteHandler route False model
 
+        LinkClick (Browser.External url) ->
+            ( model, Nav.load url )
+
+        LinkClick (Browser.Internal url) ->
+            let
+                route =
+                    RouteParser.parseAppRoute url
+            in
+            changeRouteHandler route True model
+
         ChangeRoute route ->
             changeRouteHandler route True model
 
@@ -275,6 +287,3 @@ update msg model =
             ( model, Cmd.none )
 
 
-delayCmd : Float -> Msg -> Cmd Msg
-delayCmd ms msg =
-    Cmd.none |> Cmd.map (\_ -> msg)

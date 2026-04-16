@@ -4,14 +4,8 @@
 
 - [Task Scope and Refactoring](#task-scope-and-refactoring)
 - [Import Organization](#import-organization)
-- [Control Flow](#control-flow)
-- [Functional Programming](#functional-programming)
-- [No Side Effects](#no-side-effects)
-- [Custom Types (ADTs)](#custom-types-adts)
 - [TEA Child Msg Interception](#tea-child-msg-interception)
 - [File Structure and Splitting](#file-structure-and-splitting)
-  - [Elm Modules](#elm-modules)
-  - [Dependency Order and Hierarchy](#dependency-order-and-hierarchy)
 - [UI Styling Guidelines](#ui-styling-guidelines)
 
 ---
@@ -47,58 +41,6 @@ import Type exposing (Model, Msg(..))
 
 ---
 
-## Control Flow
-
-In Elm, control flow is primarily managed via `case` expressions and `if` expressions. Avoid complex nested logic where possible.
-
-### If Expressions
-
-Always use the full `if ... then ... else ...` structure. There is no "early return" in Elm.
-
-```elm
--- ✅ Correct
-foo x =
-    if x == 0 then
-        "zero"
-    else
-        "non-zero"
-```
-
----
-
-## Functional Programming
-
-Use standard Elm functions (like those in `List`, `Maybe`, `Result`, `Dict`) instead of trying to use imperative patterns.
-
-```elm
--- ✅ Correct
-List.map (\x -> x + 1) myList
-```
-
----
-
-## No Side Effects
-
-Elm is purely functional. All side effects (API calls, storage access) must be performed via `Cmd`. Never attempt to perform side effects directly in `update` or `view`.
-
----
-
-## Custom Types (ADTs)
-
-When dealing with Custom Types, always use a `case` expression to handle all possible variants. This ensures completeness and type safety.
-
-```elm
--- ✅ Correct
-case model.page of
-    HomePage ->
-        renderHome model
-
-    ArticlePage slug ->
-        renderArticle slug model
-```
-
----
-
 ## TEA Child Msg Interception
 
 When a parent component needs to intercept or respond to specific messages from its child components, use the `updateAndCmd` pattern defined in `Package.Prelude`.
@@ -107,7 +49,7 @@ When a parent component needs to intercept or respond to specific messages from 
 
 ## File Structure and Splitting
 
-### Elm Modules
+### Modular Pages
 
 Each page should follow a mirrored modular structure:
 
@@ -115,16 +57,16 @@ Each page should follow a mirrored modular structure:
 2.  `Update.elm` - Defines the `init` and `update` logic.
 3.  `View.elm` - Defines the view functions.
 
-### Directory Naming
+### Shared Logic
 
-- **Folder names** must use **PascalCase** for modules (e.g., `src/Data/Route/`).
-- **File names** must correspond to module names (e.g., `Parser.elm`).
+- **Api**: Handlers and Types are separated into `src/Api/Handler/` and `src/Api/Type/`.
+- **Component**: Reusable components go in `src/Component/` or `src/Component.elm`.
 
 ---
 
 ## UI Styling Guidelines
 
-The project mainly uses Tailwind CSS via square-bracket notation for explicit values.
+The project primarily uses Tailwind CSS via square-bracket notation for explicit values.
 
 -   **Do not** use margin classes. Use a parent element with padding or flex/grid gap instead.
 -   **Prefer** explicit pixel values (`px`) using square brackets (e.g., `w-[304px]` instead of `w-76`).

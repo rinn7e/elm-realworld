@@ -21,12 +21,6 @@ const app = Elm.Main.init({
     }
 });
 
-app.ports.scrollToId.subscribe((id) => {
-    const el = document.getElementById(id);
-    if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-});
 
 app.ports.saveToken.subscribe((token) => {
     localStorage.setItem(TOKEN_KEY, token);

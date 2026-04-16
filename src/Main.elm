@@ -57,12 +57,12 @@ main =
         , view = view
         , subscriptions = subscriptions
         , onUrlChange = UrlChange
-        , onUrlRequest =
-            \urlRequest ->
-                case urlRequest of
-                    Browser.Internal url ->
-                        ChangeRoute (RouteParser.parseAppRoute url)
+        , onUrlRequest = LinkClick
+            -- \urlRequest ->
+            --     case urlRequest of
+            --         Browser.Internal url ->
+            --             ChangeRoute (RouteParser.parseAppRoute url)
 
-                    Browser.External href ->
-                        None
+            --         Browser.External href ->
+            --             None
         }

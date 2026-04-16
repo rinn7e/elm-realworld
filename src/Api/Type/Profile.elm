@@ -16,8 +16,8 @@ decoder : Decoder Profile
 decoder =
     Decode.succeed Profile
         |> required "username" Decode.string
-        |> required "bio" (Decode.nullable Decode.string)
-        |> required "image" (Decode.nullable Decode.string)
+        |> optional "bio" (Decode.nullable Decode.string) Nothing
+        |> optional "image" (Decode.nullable Decode.string) Nothing
         |> required "following" Decode.bool
 
 
