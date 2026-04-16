@@ -96,6 +96,11 @@ init slug maybeToken =
     )
 
 
+reInit : Maybe String -> Model -> ( Model, Cmd Msg )
+reInit maybeToken model =
+    init model.slug maybeToken
+
+
 update : String -> Msg -> Model -> ( Model, Cmd Msg )
 update token msg model =
     case msg of

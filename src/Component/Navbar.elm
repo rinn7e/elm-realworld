@@ -8,6 +8,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Package.Prelude exposing (cn)
 import Type exposing (Animate, AnimateState(..), Model, Msg(..), PageModel(..))
+import Util.View as ViewUtil
 import VitePluginHelper
 
 
@@ -122,7 +123,7 @@ view model =
                                     , href ("/profile/" ++ u.username)
                                     ]
                                     [ img
-                                        [ src (Maybe.withDefault (VitePluginHelper.asset "/src/assets/default-avatar.svg") u.image)
+                                        [ src (ViewUtil.userImage u.image)
                                         , class "h-[28px] w-[28px] rounded-full object-cover"
                                         ]
                                         []
@@ -187,7 +188,7 @@ view model =
                 ]
             ]
         , if isVisible then
-            div [ class "absolute inset-0 z-[100] flex justify-end overflow-hidden" ]
+            div [ class "fixed inset-0 z-[100] flex justify-end overflow-hidden" ]
                 [ div [ backdropCls, onClick (ToggleNavbarMobile False) ] []
                 , div [ sidebarCls ]
                     [ div [ class "flex flex-col gap-[16px]" ]

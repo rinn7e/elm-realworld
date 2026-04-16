@@ -46,7 +46,7 @@ renderPage model =
             Home.view subModel |> Html.map HomeMsg
 
         Article subModel ->
-            Article.view subModel |> Html.map ArticleMsg
+            Article.view model.shared.user subModel |> Html.map ArticleMsg
 
         Auth subModel ->
             Auth.view subModel |> Html.map AuthMsg
@@ -55,7 +55,16 @@ renderPage model =
             Editor.view subModel |> Html.map EditorMsg
 
         Profile subModel ->
-            Profile.view subModel |> Html.map ProfileMsg
+            let
+                isCurrentUser =
+                    case model.shared.user of
+                        Just u ->
+                            u.username == subModel.username
+
+                        Nothing ->
+                            False
+            in
+            Profile.view isCurrentUser subModel |> Html.map ProfileMsg
 
         Settings subModel ->
             Settings.view subModel |> Html.map SettingsMsg

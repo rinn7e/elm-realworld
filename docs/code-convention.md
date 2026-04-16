@@ -43,7 +43,24 @@ import Type exposing (Model, Msg(..))
 
 ## TEA Child Msg Interception
 
-When a parent component needs to intercept or respond to specific messages from its child components, use the `updateAndCmd` pattern defined in `Package.Prelude`.
+When a parent component needs to intercept or respond to specific messages from its child components, use the `updateAndCmd` pattern defined in `Package.Prelude`. This keeps the child message handling clean and modular by avoiding nested `case` or `if` blocks for simple interception logic.
+
+Example:
+
+```elm
+        ChildMsg subMsg ->
+            Child.update subMsg model.childModel
+                |> Tuple.mapBoth (\m -> { model | childModel = m }) (Cmd.map ChildMsg)
+                |> updateAndCmd
+                    (\m ->
+                        case subMsg of
+                            Child.Type.SpecificMsgToIntercept ->
+                                ( { m | someParentField = True }, Cmd.none )
+
+                            _ ->
+                                ( m, Cmd.none )
+                    )
+```
 
 ---
 

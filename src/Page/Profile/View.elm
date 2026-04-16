@@ -9,17 +9,12 @@ import Page.Profile.Type exposing (Model, Msg(..))
 import Package.Prelude exposing (cn)
 import Util.Http exposing (httpErrorToString)
 import Util.RemoteData as RD
+import Util.View as ViewUtil
 import VitePluginHelper
 
 
-view : Model -> Html Msg
-view model =
-    let
-        isCurrentUser =
-            -- Simplified current user check for now
-            -- In a real app we'd compare model.username with model.shared.user.username
-            False 
-    in
+view : Bool -> Model -> Html Msg
+view isCurrentUser model =
     div [ class "flex min-h-full flex-col" ]
         [ case model.profile of
             RD.NotAsked ->
@@ -40,7 +35,7 @@ view model =
                       div [ class "border-b border-gray-200 bg-gray-50 py-[12px] text-center shadow-inner lg:py-[40px]" ]
                         [ div [ class "mx-auto flex max-w-[1152px] flex-col items-center gap-[12px] px-[16px]" ]
                             [ img
-                                [ src (Maybe.withDefault (VitePluginHelper.asset "/src/assets/default-avatar.svg") profile.image)
+                                [ src (ViewUtil.userImage profile.image)
                                 , class "h-[96px] w-[96px] rounded-full border-[4px] border-white object-cover shadow-sm"
                                 , alt ""
                                 ]
@@ -116,7 +111,7 @@ viewArticle article =
             [ div [ class "flex items-center gap-[12px]" ]
                 [ a [ href ("/profile/" ++ article.author.username) ]
                     [ img 
-                        [ src (Maybe.withDefault (VitePluginHelper.asset "/src/assets/default-avatar.svg") article.author.image)
+                        [ src (ViewUtil.userImage article.author.image)
                         , class "h-[32px] w-[32px] rounded-full object-cover" 
                         ] [] 
                     ]

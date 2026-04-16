@@ -32,3 +32,4 @@ type Msg
     | SubmitCommentResponse (Result Http.Error CommentResponse)
     | DeleteComment Int
     | DeleteCommentResponse Int (Result Http.Error ())
+    | None

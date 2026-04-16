@@ -8,13 +8,13 @@ import Package.ElmForm as Form
 import Page.Settings.Type exposing (Model, Msg(..))
 
 
-settingsFormConfig : User -> List ( String, Form.FieldType Msg )
-settingsFormConfig user =
+settingsFormConfig : Maybe User -> List ( String, Form.FieldType Msg )
+settingsFormConfig maybeUser =
     [ ( "image"
       , Form.TextType
             { placeholder = "URL of profile picture"
             , label = "Profile picture"
-            , currentValue = Maybe.withDefault "" user.image
+            , currentValue = maybeUser |> Maybe.andThen .image |> Maybe.withDefault ""
             , validation = \s -> Form.nonEmptyValidator s "Image URL"
             , linkValidations = []
             , showValidation = False
@@ -28,7 +28,7 @@ settingsFormConfig user =
       , Form.TextType
             { placeholder = "Username"
             , label = "Username"
-            , currentValue = user.username
+            , currentValue = maybeUser |> Maybe.map .username |> Maybe.withDefault ""
             , validation = \s -> Form.nonEmptyValidator s "Username"
             , linkValidations = []
             , showValidation = False
@@ -42,7 +42,7 @@ settingsFormConfig user =
       , Form.TextType
             { placeholder = "Short bio about you"
             , label = "Bio"
-            , currentValue = Maybe.withDefault "" user.bio
+            , currentValue = maybeUser |> Maybe.andThen .bio |> Maybe.withDefault ""
             , validation = \s -> Form.nonEmptyValidator s "Bio"
             , linkValidations = []
             , showValidation = False
@@ -56,7 +56,7 @@ settingsFormConfig user =
       , Form.TextType
             { placeholder = "Email"
             , label = "Email"
-            , currentValue = user.email
+            , currentValue = maybeUser |> Maybe.map .email |> Maybe.withDefault ""
             , validation = Form.emailValidator
             , linkValidations = []
             , showValidation = False
@@ -83,9 +83,19 @@ settingsFormConfig user =
     ]
 
 
-init : User -> ( Model, Cmd Msg )
-init user =
-    ( { form = Form.init (Dict.fromList (settingsFormConfig user))
+init : ( Model, Cmd Msg )
+init =
+    ( { form = Form.init (Dict.fromList (settingsFormConfig Nothing))
+      , errors = Nothing
+      , submitting = False
+      }
+    , Cmd.none
+    )
+
+
+reInit : User -> ( Model, Cmd Msg )
+reInit user =
+    ( { form = Form.init (Dict.fromList (settingsFormConfig (Just user)))
       , errors = Nothing
       , submitting = False
       }

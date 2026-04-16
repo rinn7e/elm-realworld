@@ -7,6 +7,7 @@ import Html.Events exposing (onClick)
 import Page.Home.Type exposing (Model, Msg(..))
 import Util.Http exposing (httpErrorToString)
 import Util.RemoteData as RD
+import Util.View as ViewUtil
 import VitePluginHelper
 
 
@@ -75,7 +76,7 @@ viewArticle article =
         [ div [ class "flex items-center justify-between" ]
             [ div [ class "flex items-center gap-[12px]" ]
                 [ a [ href ("/profile/" ++ article.author.username) ]
-                    [ img [ src (Maybe.withDefault (VitePluginHelper.asset "/src/assets/default-avatar.svg") article.author.image), class "h-[32px] w-[32px] rounded-full object-cover" ] [] ]
+                    [ img [ src (ViewUtil.userImage article.author.image), class "h-[32px] w-[32px] rounded-full object-cover" ] [] ]
                 , div [ class "flex flex-col" ]
                     [ a [ href ("/profile/" ++ article.author.username), class "block text-sm font-medium text-green-600 hover:underline" ] [ text article.author.username ]
                     , span [ class "text-xs text-gray-400" ] [ text article.createdAt ]

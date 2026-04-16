@@ -8,14 +8,16 @@ import Component.DebugPanel.Update as DebugPanel
 import Data.Route.Parser as RouteParser
 import Data.Route.Type exposing (AppPage(..), AppRoute)
 import Http
+import Page.Article.Type as ArticleType
 import Page.Article.Update as Article
 import Page.Auth.Type as AuthType
 import Page.Auth.Update as Auth
 import Page.Editor.Update as Editor
 import Page.Home.Update as Home
 import Page.Profile.Update as Profile
+import Page.Settings.Type as SettingsType
 import Page.Settings.Update as Settings
-import Package.Prelude exposing (delayCmd)
+import Package.Prelude exposing (delayCmd, extraCmd, updateAndCmd)
 import Ports
 import Type exposing (AnimateState(..), Model, Msg(..), PageModel(..))
 import Url exposing (Url)
@@ -65,17 +67,37 @@ resultToMaybe res =
 
 
 navigate : AppRoute -> Bool -> Model -> ( Model, Cmd Msg )
-navigate newRoute isInternal model =
+navigate route isInternal model =
     let
+        -- do redirection/guard route here
+        actualRoute =
+            case route.page of
+                SettingsPage ->
+                    if model.shared.token == Nothing then
+                        { page = LoginPage }
+
+                    else
+                        route
+
+                EditorPage _ ->
+                    if model.shared.token == Nothing then
+                        { page = LoginPage }
+
+                    else
+                        route
+
+                _ ->
+                    route
+
         urlCmd =
             if isInternal then
-                Nav.pushUrl model.navKey (RouteParser.toUrlString newRoute)
+                Nav.pushUrl model.navKey (RouteParser.toUrlString actualRoute)
 
             else
                 Cmd.none
 
         ( newPageModel, subCmd ) =
-            case newRoute.page of
+            case actualRoute.page of
                 HomePage ->
                     Home.init model.shared.token
                         |> Tuple.mapBoth Home (Cmd.map HomeMsg)
@@ -93,32 +115,22 @@ navigate newRoute isInternal model =
                         |> Tuple.mapBoth Article (Cmd.map ArticleMsg)
 
                 SettingsPage ->
-                    case model.shared.user of
-                        Just user ->
-                            Settings.init user
-                                |> Tuple.mapBoth Settings (Cmd.map SettingsMsg)
-
-                        Nothing ->
-                            ( Loading, Nav.pushUrl model.navKey (RouteParser.toUrlString { page = LoginPage }) )
+                    Settings.init
+                        |> Tuple.mapBoth Settings (Cmd.map SettingsMsg)
 
                 ProfilePage { username, favorites } ->
-                    Profile.init username favorites model.shared.user
+                    Profile.init username model.shared.token favorites
                         |> Tuple.mapBoth Profile (Cmd.map ProfileMsg)
 
                 EditorPage slug ->
-                    case model.shared.user of
-                        Just _ ->
-                            Editor.init slug model.shared.token
-                                |> Tuple.mapBoth Editor (Cmd.map EditorMsg)
-
-                        Nothing ->
-                            ( Loading, Nav.pushUrl model.navKey (RouteParser.toUrlString { page = LoginPage }) )
+                    Editor.init slug model.shared.token
+                        |> Tuple.mapBoth Editor (Cmd.map EditorMsg)
 
                 NotFoundPage ->
                     ( NotFound, Cmd.none )
     in
     ( { model
-        | route = newRoute
+        | route = actualRoute
         , page = newPageModel
         , isInternal = isInternal
         , navbarMobileOpen = { internal = (), state = Invisible }
@@ -175,6 +187,19 @@ changeRouteHandler newRoute isInternal model =
     execChangeRoute newRoute isInternal model
 
 
+logoutHandler : Model -> ( Model, Cmd Msg )
+logoutHandler model =
+    let
+        shared =
+            model.shared
+
+        newShared =
+            { shared | user = Nothing, token = Nothing }
+    in
+    changeRouteHandler { page = HomePage } True { model | shared = newShared }
+        |> extraCmd (\_ -> Ports.removeToken ())
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
@@ -221,24 +246,38 @@ update msg model =
 
                 newShared =
                     { shared | user = user, token = token }
-            in
-            ( { model | shared = newShared }
-            , case token of
-                Just t ->
-                    Ports.saveToken t
 
-                Nothing ->
-                    Ports.removeToken ()
+                ( newPage, subCmd ) =
+                    case ( model.page, user ) of
+                        ( Settings _, Just u ) ->
+                            Settings.reInit u |> Tuple.mapBoth Settings (Cmd.map SettingsMsg)
+
+                        ( Profile subModel, _ ) ->
+                            Profile.reInit token subModel |> Tuple.mapBoth Profile (Cmd.map ProfileMsg)
+
+                        ( Editor subModel, _ ) ->
+                            Editor.reInit token subModel |> Tuple.mapBoth Editor (Cmd.map EditorMsg)
+
+                        _ ->
+                            ( model.page, Cmd.none )
+            in
+            ( { model | shared = newShared, page = newPage }
+            , Cmd.batch
+                [ subCmd
+                , case token of
+                    Just t ->
+                        Ports.saveToken t
+
+                    Nothing ->
+                        Ports.removeToken ()
+                ]
             )
 
         HomeMsg subMsg ->
             case model.page of
                 Home subModel ->
-                    let
-                        ( newSubModel, subCmd ) =
-                            Home.update model.shared.token subMsg subModel
-                    in
-                    ( { model | page = Home newSubModel }, Cmd.map HomeMsg subCmd )
+                    Home.update model.shared.token subMsg subModel
+                        |> Tuple.mapBoth (\newSubModel -> { model | page = Home newSubModel }) (Cmd.map HomeMsg)
 
                 _ ->
                     ( model, Cmd.none )
@@ -246,26 +285,25 @@ update msg model =
         AuthMsg subMsg ->
             case model.page of
                 Auth subModel ->
-                    let
-                        ( newSubModel, subCmd ) =
-                            Auth.update subMsg subModel
-                    in
-                    case subMsg of
-                        AuthType.SubmitResponse (Ok res) ->
-                            let
-                                user =
-                                    res.user
+                    Auth.update subMsg subModel
+                        |> Tuple.mapBoth (\newSubModel -> { model | page = Auth newSubModel }) (Cmd.map AuthMsg)
+                        |> updateAndCmd
+                            (\m ->
+                                case subMsg of
+                                    AuthType.SubmitResponse (Ok res) ->
+                                        let
+                                            user =
+                                                res.user
 
-                                newShared =
-                                    { user = Just user, token = Just user.token }
+                                            newShared =
+                                                { user = Just user, token = Just user.token }
+                                        in
+                                        changeRouteHandler { page = HomePage } True { m | shared = newShared }
+                                            |> extraCmd (\_ -> Ports.saveToken user.token)
 
-                                ( newModel, cmd ) =
-                                    changeRouteHandler { page = HomePage } True { model | shared = newShared }
-                            in
-                            ( newModel, Cmd.batch [ cmd, Ports.saveToken user.token ] )
-
-                        _ ->
-                            ( { model | page = Auth newSubModel }, Cmd.map AuthMsg subCmd )
+                                    _ ->
+                                        ( m, Cmd.none )
+                            )
 
                 _ ->
                     ( model, Cmd.none )
@@ -287,11 +325,35 @@ update msg model =
         SettingsMsg subMsg ->
             case model.page of
                 Settings subModel ->
-                    let
-                        ( newSubModel, subCmd ) =
-                            Settings.update (Maybe.withDefault "" model.shared.token) subMsg subModel
-                    in
-                    ( { model | page = Settings newSubModel }, Cmd.map SettingsMsg subCmd )
+                    Settings.update (Maybe.withDefault "" model.shared.token) subMsg subModel
+                        |> Tuple.mapBoth (\newSubModel -> { model | page = Settings newSubModel }) (Cmd.map SettingsMsg)
+                        |> updateAndCmd
+                            (\m ->
+                                case subMsg of
+                                    SettingsType.Logout ->
+                                        logoutHandler m
+
+                                    _ ->
+                                        ( m, Cmd.none )
+                            )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        ArticleMsg subMsg ->
+            case model.page of
+                Article subModel ->
+                    Article.update model.shared.token subMsg subModel
+                        |> Tuple.mapBoth (\newSubModel -> { model | page = Article newSubModel }) (Cmd.map ArticleMsg)
+                        |> updateAndCmd
+                            (\m ->
+                                case subMsg of
+                                    ArticleType.DeleteArticleResponse (Ok _) ->
+                                        changeRouteHandler { page = HomePage } True m
+
+                                    _ ->
+                                        ( m, Cmd.none )
+                            )
 
                 _ ->
                     ( model, Cmd.none )
@@ -299,11 +361,8 @@ update msg model =
         ProfileMsg subMsg ->
             case model.page of
                 Profile subModel ->
-                    let
-                        ( newSubModel, subCmd ) =
-                            Profile.update subModel.username model.shared.token subMsg subModel
-                    in
-                    ( { model | page = Profile newSubModel }, Cmd.map ProfileMsg subCmd )
+                    Profile.update subModel.username model.shared.token subMsg subModel
+                        |> Tuple.mapBoth (\newSubModel -> { model | page = Profile newSubModel }) (Cmd.map ProfileMsg)
 
                 _ ->
                     ( model, Cmd.none )
@@ -311,34 +370,18 @@ update msg model =
         EditorMsg subMsg ->
             case model.page of
                 Editor subModel ->
-                    let
-                        ( newSubModel, subCmd ) =
-                            Editor.update (Maybe.withDefault "" model.shared.token) subMsg subModel
-                    in
-                    ( { model | page = Editor newSubModel }, Cmd.map EditorMsg subCmd )
+                    Editor.update (Maybe.withDefault "" model.shared.token) subMsg subModel
+                        |> Tuple.mapBoth (\newSubModel -> { model | page = Editor newSubModel }) (Cmd.map EditorMsg)
 
                 _ ->
                     ( model, Cmd.none )
 
         DebugPanelMsg subMsg ->
-            let
-                ( newSubModel, subCmd ) =
-                    DebugPanel.update subMsg model.debugPanel
-            in
-            ( { model | debugPanel = newSubModel }, Cmd.map DebugPanelMsg subCmd )
+            DebugPanel.update subMsg model.debugPanel
+                |> Tuple.mapBoth (\newSubModel -> { model | debugPanel = newSubModel }) (Cmd.map DebugPanelMsg)
 
         Logout ->
-            let
-                shared =
-                    model.shared
-
-                newShared =
-                    { shared | user = Nothing, token = Nothing }
-
-                ( newModel, cmd ) =
-                    changeRouteHandler { page = HomePage } True { model | shared = newShared }
-            in
-            ( newModel, Cmd.batch [ cmd, Ports.removeToken () ] )
+            logoutHandler model
 
         _ ->
             ( model, Cmd.none )
