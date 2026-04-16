@@ -7,14 +7,14 @@ import Package.ElmForm as Form
 
 type alias Model =
     { isRegister : Bool
-    , loginForm : Form.Model
-    , signupForm : Form.Model
+    , loginForm : Form.Model Msg
+    , signupForm : Form.Model Msg
     , errors : Maybe String
     , submitting : Bool
     }
 
 
 type Msg
-    = FormMsg String String -- Key Value
+    = FormMsg Form.Msg
     | Submit
     | SubmitResponse (Result Http.Error UserResponse)

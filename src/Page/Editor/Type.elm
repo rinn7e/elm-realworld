@@ -7,7 +7,7 @@ import Package.ElmForm as Form
 
 type alias Model =
     { slug : Maybe String
-    , form : Form.Model
+    , form : Form.Model Msg
     , tagList : List String
     , errors : Maybe String
     , submitting : Bool
@@ -15,8 +15,7 @@ type alias Model =
 
 
 type Msg
-    = FormMsg String String -- Key Value
-    | FormFocus String Bool
+    = FormMsg Form.Msg
     | Submit
     | SubmitResponse (Result Http.Error ArticleResponse)
     | GetArticleResponse (Result Http.Error ArticleResponse)

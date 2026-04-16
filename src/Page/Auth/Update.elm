@@ -1,29 +1,81 @@
 module Page.Auth.Update exposing (..)
 
 import Api.Handler.User as UserApi
-import Api.Type.User exposing (UserResponse)
-import Http
+import Component.FormFields exposing (standardInputUi)
+import Dict
 import Package.ElmForm as Form
 import Page.Auth.Type exposing (Model, Msg(..))
 
 
+emailField : ( String, Form.FieldType Msg )
+emailField =
+    ( "email"
+    , Form.TextType
+        { placeholder = "Email"
+        , label = "Email"
+        , currentValue = ""
+        , validation = Form.emailValidator
+        , linkValidations = []
+        , showValidation = False
+        , isTextarea = False
+        , isPassword = Nothing
+        , isFocus = False
+        , ui = standardInputUi False True
+        }
+    )
+
+
+passwordField : ( String, Form.FieldType Msg )
+passwordField =
+    ( "password"
+    , Form.TextType
+        { placeholder = "Password"
+        , label = "Password"
+        , currentValue = ""
+        , validation = Form.minLengthValidator "Password" 8
+        , linkValidations = []
+        , showValidation = False
+        , isTextarea = False
+        , isPassword = Just { revealPassword = False, disableAutocomplete = False }
+        , isFocus = False
+        , ui = standardInputUi False True
+        }
+    )
+
+
+usernameField : ( String, Form.FieldType Msg )
+usernameField =
+    ( "username"
+    , Form.TextType
+        { placeholder = "Username"
+        , label = "Username"
+        , currentValue = ""
+        , validation = \s -> Form.nonEmptyValidator s "Username"
+        , linkValidations = []
+        , showValidation = False
+        , isTextarea = False
+        , isPassword = Nothing
+        , isFocus = False
+        , ui = standardInputUi False True
+        }
+    )
+
+
+loginFormConfig : List ( String, Form.FieldType Msg )
+loginFormConfig =
+    [ emailField, passwordField ]
+
+
+signupFormConfig : List ( String, Form.FieldType Msg )
+signupFormConfig =
+    [ usernameField, emailField, passwordField ]
+
+
 init : Bool -> ( Model, Cmd Msg )
 init isRegister =
-    let
-        loginForm =
-            Form.init
-                |> Form.updateValue "email" ""
-                |> Form.updateValue "password" ""
-
-        signupForm =
-            Form.init
-                |> Form.updateValue "username" ""
-                |> Form.updateValue "email" ""
-                |> Form.updateValue "password" ""
-    in
     ( { isRegister = isRegister
-      , loginForm = loginForm
-      , signupForm = signupForm
+      , loginForm = Form.init (Dict.fromList loginFormConfig)
+      , signupForm = Form.init (Dict.fromList signupFormConfig)
       , errors = Nothing
       , submitting = False
       }
@@ -34,37 +86,38 @@ init isRegister =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        FormMsg key value ->
+        FormMsg subMsg ->
             if model.isRegister then
-                ( { model | signupForm = Form.updateValue key value model.signupForm }, Cmd.none )
+                ( { model | signupForm = Form.update subMsg model.signupForm }, Cmd.none )
 
             else
-                ( { model | loginForm = Form.updateValue key value model.loginForm }, Cmd.none )
+                ( { model | loginForm = Form.update subMsg model.loginForm }, Cmd.none )
 
         Submit ->
+            let
+                currentForm =
+                    if model.isRegister then
+                        model.signupForm
+
+                    else
+                        model.loginForm
+
+                email =
+                    Form.getTextValue "email" currentForm
+
+                password =
+                    Form.getTextValue "password" currentForm
+            in
             if model.isRegister then
                 let
                     username =
-                        Form.getTextValue "username" model.signupForm
-
-                    email =
-                        Form.getTextValue "email" model.signupForm
-
-                    password =
-                        Form.getTextValue "password" model.signupForm
+                        Form.getTextValue "username" currentForm
                 in
                 ( { model | submitting = True }
                 , UserApi.register { username = username, email = email, password = password } SubmitResponse
                 )
 
             else
-                let
-                    email =
-                        Form.getTextValue "email" model.loginForm
-
-                    password =
-                        Form.getTextValue "password" model.loginForm
-                in
                 ( { model | submitting = True }
                 , UserApi.login { email = email, password = password } SubmitResponse
                 )

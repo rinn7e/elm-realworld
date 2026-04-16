@@ -6,15 +6,14 @@ import Package.ElmForm as Form
 
 
 type alias Model =
-    { form : Form.Model
+    { form : Form.Model Msg
     , errors : Maybe String
     , submitting : Bool
     }
 
 
 type Msg
-    = FormMsg String String
-    | FormFocus String Bool
+    = FormMsg Form.Msg
     | Submit
     | SubmitResponse (Result Http.Error UserResponse)
     | Logout

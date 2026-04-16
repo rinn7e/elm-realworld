@@ -3,16 +3,15 @@ module Page.Settings.View exposing (view)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onSubmit)
-import Page.Settings.Type exposing (Model, Msg(..))
 import Package.ElmForm as Form
+import Page.Settings.Type exposing (Model, Msg(..))
 
 
 view : Model -> Html Msg
 view model =
-    div [ class "flex min-h-full items-start justify-center px-[16px] pb-[32px] pt-[64px]" ]
+    div [ class "flex min-h-full items-start justify-center px-[16px] pt-[64px] pb-[32px]" ]
         [ div [ class "flex w-full max-w-[448px] flex-col gap-[24px]" ]
-            [ h1 [ class "text-center text-3xl font-bold text-gray-900" ]
-                [ text "Your Settings" ]
+            [ h1 [ class "text-center text-3xl font-bold text-gray-900" ] [ text "Your Settings" ]
             , case model.errors of
                 Just err ->
                     ul [ class "flex flex-col gap-[4px] rounded border border-red-200 bg-red-50 p-[12px] text-sm text-red-700" ]
@@ -20,16 +19,13 @@ view model =
 
                 Nothing ->
                     text ""
-            , Html.form
-                [ class "flex flex-col gap-[24px]"
-                , onSubmit Submit
-                ]
-                [ fieldset [ class "flex flex-col gap-[16px]" ]
-                    [ Form.viewItem "image" model.form FormMsg FormFocus
-                    , Form.viewItem "username" model.form FormMsg FormFocus
-                    , Form.viewItem "bio" model.form FormMsg FormFocus
-                    , Form.viewItem "email" model.form FormMsg FormFocus
-                    , Form.viewItem "password" model.form FormMsg FormFocus
+            , Html.form [ class "flex flex-col gap-[24px]", onSubmit Submit ]
+                [ fieldset [ class "flex flex-col gap-[0px]" ]
+                    [ Form.viewItem "image" model.form FormMsg
+                    , Form.viewItem "username" model.form FormMsg
+                    , Form.viewItem "bio" model.form FormMsg
+                    , Form.viewItem "email" model.form FormMsg
+                    , Form.viewItem "password" model.form FormMsg
                     , div [ class "flex justify-end pt-[16px]" ]
                         [ button
                             [ class "rounded bg-green-600 px-[20px] py-[10px] text-sm font-semibold text-white transition-colors hover:bg-green-700 disabled:opacity-60"

@@ -3,8 +3,8 @@ module Page.Editor.View exposing (view)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onSubmit)
-import Page.Editor.Type exposing (Model, Msg(..))
 import Package.ElmForm as Form
+import Page.Editor.Type exposing (Model, Msg(..))
 
 
 view : Model -> Html Msg
@@ -18,12 +18,12 @@ view model =
             Nothing ->
                 text ""
         , Html.form [ onSubmit Submit ]
-            [ fieldset [ class "flex flex-col gap-[24px]" ]
-                [ Form.viewItem "title" model.form FormMsg FormFocus
-                , Form.viewItem "description" model.form FormMsg FormFocus
-                , Form.viewItem "body" model.form FormMsg FormFocus
+            [ fieldset [ class "flex flex-col gap-[0px]" ]
+                [ Form.viewItem "title" model.form FormMsg
+                , Form.viewItem "description" model.form FormMsg
+                , Form.viewItem "body" model.form FormMsg
                 , div [ class "flex flex-col gap-[8px]" ]
-                    [ Form.viewItem "tagInput" model.form FormMsg FormFocus
+                    [ Form.viewItem "tagInput" model.form FormMsg
                     , div [ class "flex flex-wrap gap-[4px] px-[12px]" ]
                         (List.map viewTag model.tagList)
                     ]

@@ -71,3 +71,32 @@ encodeRegisterRequest request =
                 ]
           )
         ]
+type alias UpdateUserRequest =
+    { email : String
+    , username : String
+    , bio : Maybe String
+    , image : Maybe String
+    , password : Maybe String
+    }
+
+
+encodeUpdateUserRequest : UpdateUserRequest -> Encode.Value
+encodeUpdateUserRequest request =
+    Encode.object
+        [ ( "user"
+          , Encode.object
+                ([ ( "email", Encode.string request.email )
+                 , ( "username", Encode.string request.username )
+                 , ( "bio", request.bio |> Maybe.map Encode.string |> Maybe.withDefault Encode.null )
+                 , ( "image", request.image |> Maybe.map Encode.string |> Maybe.withDefault Encode.null )
+                 ]
+                    ++ (case request.password of
+                            Just p ->
+                                [ ( "password", Encode.string p ) ]
+
+                            Nothing ->
+                                []
+                       )
+                )
+          )
+        ]

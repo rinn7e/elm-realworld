@@ -118,3 +118,27 @@ deleteArticle token slug toMsg =
         , timeout = Nothing
         , tracker = Nothing
         }
+createArticle : String -> Article.ArticleRequest -> (Result Http.Error ArticleResponse -> msg) -> Cmd msg
+createArticle token request toMsg =
+    Http.request
+        { method = "POST"
+        , headers = authHeader (Just token)
+        , url = apiUrl "/articles"
+        , body = Http.jsonBody (Article.encodeArticleRequest request)
+        , expect = Http.expectJson toMsg Article.responseDecoder
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+updateArticle : String -> String -> Article.ArticleRequest -> (Result Http.Error ArticleResponse -> msg) -> Cmd msg
+updateArticle token slug request toMsg =
+    Http.request
+        { method = "PUT"
+        , headers = authHeader (Just token)
+        , url = apiUrl ("/articles/" ++ slug)
+        , body = Http.jsonBody (Article.encodeArticleRequest request)
+        , expect = Http.expectJson toMsg Article.responseDecoder
+        , timeout = Nothing
+        , tracker = Nothing
+        }

@@ -3,6 +3,7 @@ module Api.Type.Article exposing (..)
 import Api.Type.Profile as Profile exposing (Profile)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline exposing (optional, required)
+import Json.Encode as Encode
 
 
 type alias Article =
@@ -56,3 +57,23 @@ articlesResponseDecoder =
     Decode.succeed ArticlesResponse
         |> required "articles" (Decode.list decoder)
         |> required "articlesCount" Decode.int
+type alias ArticleRequest =
+    { title : String
+    , description : String
+    , body : String
+    , tagList : List String
+    }
+
+
+encodeArticleRequest : ArticleRequest -> Encode.Value
+encodeArticleRequest request =
+    Encode.object
+        [ ( "article"
+          , Encode.object
+                [ ( "title", Encode.string request.title )
+                , ( "description", Encode.string request.description )
+                , ( "body", Encode.string request.body )
+                , ( "tagList", Encode.list Encode.string request.tagList )
+                ]
+          )
+        ]

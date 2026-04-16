@@ -34,3 +34,14 @@ register request toMsg =
         , body = Http.jsonBody (User.encodeRegisterRequest request)
         , expect = Http.expectJson toMsg User.responseDecoder
         }
+updateUser : String -> User.UpdateUserRequest -> (Result Http.Error UserResponse -> msg) -> Cmd msg
+updateUser token request toMsg =
+    Http.request
+        { method = "PUT"
+        , headers = authHeader (Just token)
+        , url = apiUrl "/user"
+        , body = Http.jsonBody (User.encodeUpdateUserRequest request)
+        , expect = Http.expectJson toMsg User.responseDecoder
+        , timeout = Nothing
+        , tracker = Nothing
+        }
