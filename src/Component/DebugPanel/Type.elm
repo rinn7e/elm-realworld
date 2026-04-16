@@ -8,6 +8,7 @@ type alias Model =
 
 type Msg
     = ToggleCollapse
+    | ClearCacheAndReload
 
 
 init : Model

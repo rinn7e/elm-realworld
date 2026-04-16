@@ -14,6 +14,7 @@ type alias Model =
 
 type Msg
     = FormMsg String String
+    | FormFocus String Bool
     | Submit
     | SubmitResponse (Result Http.Error UserResponse)
     | Logout

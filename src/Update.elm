@@ -3,7 +3,7 @@ module Update exposing (..)
 import Api.Handler.User as UserApi
 import Browser
 import Browser.Navigation as Nav
-import Component.DebugPanel.Type as DebugPanel
+import Component.DebugPanel.Type as DebugPanelType
 import Component.DebugPanel.Update as DebugPanel
 import Data.Route.Parser as RouteParser
 import Data.Route.Type exposing (AppPage(..), AppRoute)
@@ -33,7 +33,7 @@ init flags url key =
             , shared = { user = Nothing, token = flags.token }
             , page = Loading
             , isInternal = False
-            , debugPanel = DebugPanel.init
+            , debugPanel = DebugPanelType.init
             , navbarMobileOpen = { internal = (), state = Invisible }
             , navKey = key
             }
@@ -177,6 +177,10 @@ changeRouteHandler newRoute isInternal model =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
+    let
+        _ =
+            Debug.log "Msg" (Debug.toString msg)
+    in
     case msg of
         UrlChange url ->
             if model.isInternal then
@@ -280,8 +284,61 @@ update msg model =
             in
             ( { model | navbarMobileOpen = { navState | state = state } }, Cmd.none )
 
+        SettingsMsg subMsg ->
+            case model.page of
+                Settings subModel ->
+                    let
+                        ( newSubModel, subCmd ) =
+                            Settings.update (Maybe.withDefault "" model.shared.token) subMsg subModel
+                    in
+                    ( { model | page = Settings newSubModel }, Cmd.map SettingsMsg subCmd )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        ProfileMsg subMsg ->
+            case model.page of
+                Profile subModel ->
+                    let
+                        ( newSubModel, subCmd ) =
+                            Profile.update subModel.username model.shared.token subMsg subModel
+                    in
+                    ( { model | page = Profile newSubModel }, Cmd.map ProfileMsg subCmd )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        EditorMsg subMsg ->
+            case model.page of
+                Editor subModel ->
+                    let
+                        ( newSubModel, subCmd ) =
+                            Editor.update (Maybe.withDefault "" model.shared.token) subMsg subModel
+                    in
+                    ( { model | page = Editor newSubModel }, Cmd.map EditorMsg subCmd )
+
+                _ ->
+                    ( model, Cmd.none )
+
         DebugPanelMsg subMsg ->
-            ( { model | debugPanel = DebugPanel.update subMsg model.debugPanel }, Cmd.none )
+            let
+                ( newSubModel, subCmd ) =
+                    DebugPanel.update subMsg model.debugPanel
+            in
+            ( { model | debugPanel = newSubModel }, Cmd.map DebugPanelMsg subCmd )
+
+        Logout ->
+            let
+                shared =
+                    model.shared
+
+                newShared =
+                    { shared | user = Nothing, token = Nothing }
+
+                ( newModel, cmd ) =
+                    changeRouteHandler { page = HomePage } True { model | shared = newShared }
+            in
+            ( newModel, Cmd.batch [ cmd, Ports.removeToken () ] )
 
         _ ->
             ( model, Cmd.none )

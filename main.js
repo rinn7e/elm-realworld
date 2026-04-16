@@ -29,3 +29,8 @@ app.ports.saveToken.subscribe((token) => {
 app.ports.removeToken.subscribe(() => {
     localStorage.removeItem(TOKEN_KEY);
 });
+
+
+app.ports.reload.subscribe(() => {
+    location.reload();
+});

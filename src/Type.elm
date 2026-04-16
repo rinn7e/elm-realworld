@@ -73,4 +73,5 @@ type Msg
     | DebugPanelMsg DebugPanel.Msg
     | ToggleNavbarMobile Bool
     | SetNavbarMobileState AnimateState
+    | Logout
     | None

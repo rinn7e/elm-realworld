@@ -16,6 +16,7 @@ type alias Model =
 
 type Msg
     = FormMsg String String -- Key Value
+    | FormFocus String Bool
     | Submit
     | SubmitResponse (Result Http.Error ArticleResponse)
     | GetArticleResponse (Result Http.Error ArticleResponse)

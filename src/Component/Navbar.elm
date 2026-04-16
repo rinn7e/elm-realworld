@@ -28,6 +28,35 @@ view model =
                 _ ->
                     False
 
+        isEditor =
+            case pageTag of
+                Editor _ ->
+                    True
+
+                _ ->
+                    False
+
+        isSettings =
+            case pageTag of
+                Settings _ ->
+                    True
+
+                _ ->
+                    False
+
+        isProfile =
+            case pageTag of
+                Profile subModel ->
+                    case user of
+                        Just u ->
+                            subModel.username == u.username
+
+                        Nothing ->
+                            False
+
+                _ ->
+                    False
+
         activeCls =
             "font-semibold text-green-600"
 
@@ -54,21 +83,42 @@ view model =
                         Just u ->
                             [ li []
                                 [ a
-                                    [ cn [ "flex items-center gap-[4px] rounded px-[12px] py-[6px] text-sm", inactiveCls ]
+                                    [ cn
+                                        [ "flex items-center gap-[4px] rounded px-[12px] py-[6px] text-sm"
+                                        , if isEditor then
+                                            activeCls
+
+                                          else
+                                            inactiveCls
+                                        ]
                                     , href "/editor"
                                     ]
                                     [ text "New Article" ]
                                 ]
                             , li []
                                 [ a
-                                    [ cn [ "flex items-center gap-[4px] rounded px-[12px] py-[6px] text-sm", inactiveCls ]
+                                    [ cn
+                                        [ "flex items-center gap-[4px] rounded px-[12px] py-[6px] text-sm"
+                                        , if isSettings then
+                                            activeCls
+
+                                          else
+                                            inactiveCls
+                                        ]
                                     , href "/settings"
                                     ]
                                     [ text "Settings" ]
                                 ]
                             , li []
                                 [ a
-                                    [ cn [ "flex items-center gap-[8px] rounded px-[12px] py-[6px] text-sm", inactiveCls ]
+                                    [ cn
+                                        [ "flex items-center gap-[8px] rounded px-[12px] py-[6px] text-sm"
+                                        , if isProfile then
+                                            activeCls
+
+                                          else
+                                            inactiveCls
+                                        ]
                                     , href ("/profile/" ++ u.username)
                                     ]
                                     [ img

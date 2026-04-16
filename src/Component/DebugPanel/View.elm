@@ -39,6 +39,7 @@ view model =
                                 , button
                                     [ type_ "button"
                                     , class "group flex w-full items-center gap-3 rounded-xl bg-gray-800 p-3 text-left transition-all hover:bg-gray-700"
+                                    , onClick ClearCacheAndReload
                                     ]
                                     [ div [ class "flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/10 transition-colors group-hover:bg-red-500/20" ]
                                         [ text "🔄" ]
