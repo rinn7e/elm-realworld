@@ -202,10 +202,12 @@ logoutHandler model =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
+    {-
     let
         _ =
             Debug.log "Msg" (Debug.toString msg)
     in
+    -}
     case msg of
         UrlChange url ->
             if model.isInternal then

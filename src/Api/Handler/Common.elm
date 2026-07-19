@@ -3,6 +3,11 @@ module Api.Handler.Common exposing (..)
 import Http
 
 
+apiBaseUrl : String
+apiBaseUrl =
+    "https://rinn7e-haskell-realworld-api.fly.dev/api"
+
+
 apiUrl : String -> String
 apiUrl path =
     let
@@ -13,7 +18,7 @@ apiUrl path =
             else
                 "/" ++ path
     in
-    "http://localhost:3000/api" ++ normalizedPath
+    apiBaseUrl ++ normalizedPath
 
 
 authHeader : Maybe String -> List Http.Header

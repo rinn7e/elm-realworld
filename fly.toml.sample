@@ -1,0 +1,15 @@
+# fly.toml.sample - Configuration for deploying Elm static website to Fly.io
+
+app = "rinn7e-elm-realworld"
+primary_region = "sin"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[http_service]
+  internal_port = 80
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
