@@ -1,5 +1,7 @@
 # Elm RealWorld App 🌳✨
 
+[![AI-DECLARATION: assist](https://img.shields.io/badge/䷼%20AI--DECLARATION-assist-fef9c3?labelColor=fef9c3)](AI-DECLARATION.md)
+
 An implementation of the [RealWorld](https://github.com/gothinkster/realworld) spec (Medium clone) built using **Elm**, **Vite**, and **TailwindCSS** (with **DaisyUI**).
 
 This project sets up a modern development environment with fast Hot Module Replacement (HMR) and strict compile-time safety.
@@ -55,3 +57,10 @@ Here are the commands you can run in this project:
 * **Build Tool:** [Vite](https://vitejs.dev/) with `vite-plugin-elm` for fast builds and reloads.
 * **Styling:** [TailwindCSS](https://tailwindcss.com/) & [DaisyUI](https://daisyui.com/) for modern, responsive, and themeable UI components.
 * **Tooling:** Managed by `elm-tooling` to ensure consistent compiler and formatting tools.
+
+---
+
+## AI declaration
+
+This project declares its AI usage in [AI-DECLARATION.md](AI-DECLARATION.md), following the
+[AI-DECLARATION.md](https://ai-declaration.md) standard (level: `assist`).
